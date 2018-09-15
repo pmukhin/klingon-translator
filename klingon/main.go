@@ -15,7 +15,7 @@ type response struct {
 }
 
 func Main(name string) error {
-	lexer := parser.New([]rune(name))
+	lexer := parser.New(name)
 	translatedName, err := lexer.Parse()
 
 	if err != nil {
