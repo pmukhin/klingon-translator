@@ -6,33 +6,28 @@ import (
 )
 
 var (
+	// end of line error
 	EOF = errors.New("EOF")
 )
 
+// Parser tokenizes input into chars and translates each character
+// into a corresponding Klingon character
 type Parser interface {
 	Parse() ([]rune, error)
 }
 
+// defaultParser is a default Parser implementation
 type defaultParser struct {
 	src    []byte
 	offset int
 	len    int
 }
 
-func makeErr(r byte, pos int) error {
-	return errors.New(
-		fmt.Sprintf(
-			"unexpected character %s in pos %d",
-			string(r),
-			pos,
-		),
-	)
-}
-
+// Parse combines tokens into a slice of runes
 func (p defaultParser) Parse() ([]rune, error) {
 	output := make([]rune, 0, 256)
 	for {
-		ch, err := p.getChar()
+		ch, err := p.scan()
 		if err != nil {
 			if err == EOF {
 				return output, nil
@@ -44,12 +39,17 @@ func (p defaultParser) Parse() ([]rune, error) {
 	return output, nil
 }
 
-func (p *defaultParser) getChar() (rune, error) {
+// scan is a core method here
+// same pattern is used as golang lexer uses
+// https://github.com/golang/go/blob/master/src/go/scanner/scanner.go
+func (p *defaultParser) scan() (rune, error) {
 	for {
 		p.next()
 		if p.offset >= p.len {
+			// oops, all input is eaten
 			return -1, EOF
 		}
+
 		ch := p.src[p.offset]
 		switch ch {
 		case 'a', 'A':
@@ -59,10 +59,11 @@ func (p *defaultParser) getChar() (rune, error) {
 		case 'c', 'C':
 			nextCh := p.peek()
 			if nextCh == 'h' || nextCh == 'H' {
-				p.next()
+				p.next() // eat 'h' or 'H'
 				return 0xF8D2, nil
 			} else {
-				return 0, makeErr(nextCh, p.offset+1)
+				// standalone c(C) is not a valid char in Klingon hence error
+				return 0, p.makeErr()
 			}
 		case 'd', 'D':
 			return 0xF8D3, nil
@@ -74,7 +75,8 @@ func (p *defaultParser) getChar() (rune, error) {
 				p.next()
 				return 0xF8D5, nil
 			} else {
-				return 0, makeErr(nextCh, p.offset+1)
+				// standalone g(G) is not a valid char in Klingon hence error
+				return 0, p.makeErr()
 			}
 		case 'h', 'H':
 			return 0xF8D6, nil
@@ -92,6 +94,7 @@ func (p *defaultParser) getChar() (rune, error) {
 				p.next()
 				return 0xF8DC, nil
 			} else {
+				// both n(N) and ng(nG, NG, Ng) are valid, so no error here
 				return 0xF8DB, nil
 			}
 		case 'o', 'O':
@@ -107,17 +110,20 @@ func (p *defaultParser) getChar() (rune, error) {
 		case 's', 'S':
 			return 0xF8E2, nil
 		case 't', 'T':
+			// as t(T) valid standalone char let's first check if there's no l(L) in front
 			nextCh := p.peek()
 			if nextCh == 'l' || nextCh == 'L' {
-				p.next()
-				nextNextCh := p.peek()
+				p.next()               // eat l(L)
+				nextNextCh := p.peek() // as standalone l(L) is not valid, let's dig deeper
 				if nextNextCh == 'h' || nextNextCh == 'H' {
-					p.next()
+					p.next() // bingo, it's tlh
 					return 0xF8E4, nil
 				} else {
-					return 0, makeErr(nextCh, p.offset)
+					// tl(TL, tL, Tl) are not valid, so error
+					return 0, p.makeErr()
 				}
 			} else {
+				// if no then just t(T)
 				return 0xF8E3, nil
 			}
 		case 'u', 'U':
@@ -133,9 +139,20 @@ func (p *defaultParser) getChar() (rune, error) {
 		case ' ':
 			return ' ', nil
 		default:
-			return -1, makeErr(p.peek(), p.offset+1)
+			return -1, p.makeErr()
 		}
 	}
+}
+
+// makeErr constructs an error from the context
+func (p defaultParser) makeErr() error {
+	return errors.New(
+		fmt.Sprintf(
+			"unexpected character %s in pos %d",
+			string(p.peek()),
+			p.offset+1,
+		),
+	)
 }
 
 func (p *defaultParser) next() {
@@ -149,6 +166,7 @@ func (p defaultParser) peek() byte {
 	return p.src[p.offset+1]
 }
 
+// New is a constructor for a defaultParser
 func New(input string) Parser {
 	src := []byte(input)
 	return &defaultParser{

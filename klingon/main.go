@@ -1,8 +1,8 @@
 package klingon
 
 import (
+	"fmt"
 	"github.com/pmukhin/klingon-translator/klingon/parser"
-	"github.com/pmukhin/klingon-translator/klingon/stapi"
 )
 
 const (
@@ -22,8 +22,8 @@ func Main(name string) error {
 		return err
 	}
 
-	client := stapi.New()
-	_ = client.Search(translatedName)
+	//client := stapi.New()
+	//_ = client.Search(translatedName)
 
 	res := response{
 		parsedName:    translatedName,
@@ -36,5 +36,8 @@ func Main(name string) error {
 }
 
 func render(res response) {
-
+	for _, ch := range res.parsedName {
+		fmt.Printf("0x%X ", ch)
+	}
+	fmt.Println()
 }
