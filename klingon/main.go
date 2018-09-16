@@ -1,8 +1,10 @@
 package klingon
 
 import (
+	"errors"
 	"fmt"
 	"github.com/pmukhin/klingon-translator/klingon/parser"
+	"github.com/pmukhin/klingon-translator/klingon/stapi"
 )
 
 const (
@@ -22,8 +24,23 @@ func Main(name string) error {
 		return err
 	}
 
-	//client := stapi.New()
-	//_ = client.Search(translatedName)
+	stapiClient := stapi.New()
+
+	foundCharacters := stapiClient.Characters().Search(name)
+	if len(foundCharacters) < 1 {
+		return errors.New(fmt.Sprintf("character %s is not found via Stapi.co", name))
+	}
+
+	character := stapiClient.Characters().Get(foundCharacters[0].UID)
+	if character == nil {
+		return errors.New(
+			fmt.Sprintf(
+				"unexpected error: %s is not found via Stapi.co by UID %s",
+				name,
+				foundCharacters[0].UID,
+			),
+		)
+	}
 
 	res := response{
 		parsedName:    translatedName,
