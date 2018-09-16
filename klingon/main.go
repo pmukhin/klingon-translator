@@ -7,10 +7,6 @@ import (
 	"github.com/pmukhin/klingon-translator/klingon/stapi"
 )
 
-const (
-	searchUri = "http://stapi.co/api/v1/rest/character/search"
-)
-
 type response struct {
 	parsedName    []rune
 	characterName string
@@ -26,12 +22,15 @@ func Main(name string) error {
 
 	stapiClient := stapi.New()
 
-	foundCharacters := stapiClient.Characters().Search(name)
+	foundCharacters, err := stapiClient.Characters().Search(name)
+	if err != nil {
+		return err
+	}
 	if len(foundCharacters) < 1 {
 		return errors.New(fmt.Sprintf("character %s is not found via Stapi.co", name))
 	}
 
-	character := stapiClient.Characters().Get(foundCharacters[0].UID)
+	character, err := stapiClient.Characters().Get(foundCharacters[0].UID)
 	if character == nil {
 		return errors.New(
 			fmt.Sprintf(
@@ -42,9 +41,14 @@ func Main(name string) error {
 		)
 	}
 
+	species := "Human"
+	if len(character.CharacterSpecies) > 0 {
+		species = character.CharacterSpecies[0].Name
+	}
+
 	res := response{
 		parsedName:    translatedName,
-		characterName: "",
+		characterName: species,
 	}
 
 	render(res)
@@ -57,4 +61,5 @@ func render(res response) {
 		fmt.Printf("0x%X ", ch)
 	}
 	fmt.Println()
+	fmt.Println(res.characterName)
 }

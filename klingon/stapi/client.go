@@ -3,8 +3,7 @@ package stapi
 import "github.com/pmukhin/klingon-translator/klingon/stapi/character"
 
 const (
-	apiUrl         = ""
-	defaultSpecies = "Human"
+	baseUrl        = "http://stapi.co"
 )
 
 // Client is a top level interface to access Stapi.co
@@ -25,6 +24,6 @@ func (d defaultClient) Characters() character.CharactersClient {
 // New is a constructor for default implementation of Client
 func New() Client {
 	return &defaultClient{
-		characters: character.New(),
+		characters: character.New(baseUrl),
 	}
 }
