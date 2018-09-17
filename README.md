@@ -8,7 +8,7 @@
 Input is lexed by a `Lexer` to find a letter-by-letter equivalent.
 
 ### Fetching the species
-There's a `stapi` package which contains a `stapi.Client`. `stapi.Client` contains access to enitiy-specific clients.
+There's a `stapi` package which contains a `stapi.Client`. `stapi.Client` contains access to entity-specific clients.
 To search for characters, for instance, we have to do the following:
 
 ```go
