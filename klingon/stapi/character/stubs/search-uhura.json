@@ -1,0 +1,39 @@
+{
+  "page": {
+    "pageNumber": 0,
+    "pageSize": 50,
+    "numberOfElements": 1,
+    "totalElements": 1,
+    "totalPages": 1,
+    "firstPage": true,
+    "lastPage": true
+  },
+  "characters": [
+    {
+      "uid": "CHMA0000023576",
+      "name": "Nyota Uhura",
+      "gender": "F",
+      "yearOfBirth": 2239,
+      "monthOfBirth": null,
+      "dayOfBirth": null,
+      "placeOfBirth": null,
+      "yearOfDeath": 2268,
+      "monthOfDeath": null,
+      "dayOfDeath": null,
+      "placeOfDeath": null,
+      "height": null,
+      "weight": null,
+      "deceased": null,
+      "bloodType": null,
+      "maritalStatus": "SINGLE",
+      "serialNumber": null,
+      "hologramActivationDate": null,
+      "hologramStatus": null,
+      "hologramDateStatus": null,
+      "hologram": false,
+      "fictionalCharacter": false,
+      "mirror": true,
+      "alternateReality": false
+    }
+  ]
+}
