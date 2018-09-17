@@ -3,7 +3,7 @@ package stapi
 import "github.com/pmukhin/klingon-translator/klingon/stapi/character"
 
 const (
-	baseUrl        = "http://stapi.co"
+	baseUrl = "http://stapi.co"
 )
 
 // Client is a top level interface to access Stapi.co

@@ -1,10 +1,12 @@
 package character
 
+// Species represents a species of the current Character
 type Species struct {
 	UID  UID    `json:"uid"`
 	Name string `json:"name"`
 }
 
+// Short represents brief structure of Character
 type Short struct {
 	UID              string `json:"uid"`
 	Name             string `json:"name"`
@@ -13,6 +15,7 @@ type Short struct {
 	AlternateReality bool   `json:"alternateReality"`
 }
 
+// Full represents full structure of Character
 type Full struct {
 	UID                UID       `json:"uid"`
 	Name               string    `json:"name"`
