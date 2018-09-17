@@ -3,8 +3,8 @@ package klingon
 import (
 	"errors"
 	"fmt"
-	"github.com/pmukhin/klingon-translator/klingon/parser"
-	"github.com/pmukhin/klingon-translator/klingon/stapi"
+	"github.com/pmukhin/klingon-translator/pkg/klingon/parser"
+	"github.com/pmukhin/klingon-translator/pkg/klingon/stapi"
 	"net/http"
 )
 

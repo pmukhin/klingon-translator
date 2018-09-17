@@ -1,8 +1,8 @@
 package stapi
 
 import (
-	"github.com/pmukhin/klingon-translator/klingon/stapi/character"
-	"github.com/pmukhin/klingon-translator/klingon/stapi/http"
+	"github.com/pmukhin/klingon-translator/pkg/klingon/stapi/character"
+	"github.com/pmukhin/klingon-translator/pkg/klingon/stapi/http"
 )
 
 const (

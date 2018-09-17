@@ -2,7 +2,7 @@ package character
 
 import (
 	"fmt"
-	"github.com/pmukhin/klingon-translator/klingon/stapi/http"
+	"github.com/pmukhin/klingon-translator/pkg/klingon/stapi/http"
 	"net/url"
 	"strings"
 )
