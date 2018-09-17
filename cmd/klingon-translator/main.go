@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pmukhin/klingon-translator/pkg/klingon"
 	"os"
+	"strings"
 )
 
 var (
@@ -22,7 +23,7 @@ func version() {
 func main() {
 	args := os.Args
 	// no args then usage
-	if len(args) != 2 {
+	if len(args) < 2 {
 		usage()
 		return
 	}
@@ -34,8 +35,12 @@ func main() {
 	case "-h", "-help", "help", "usage":
 		usage()
 	default:
-		err := klingon.Main(postfix)
-		if err != nil {
+		name := postfix
+		if len(args) > 2 {
+			name = strings.Join(args[1:], " ")
+		}
+
+		if err := klingon.Main(name); err != nil {
 			fmt.Println(err.Error())
 			os.Exit(-1)
 		}
