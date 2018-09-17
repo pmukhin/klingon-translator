@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"github.com/pmukhin/klingon-translator/pkg/klingon/parser"
 	"github.com/pmukhin/klingon-translator/pkg/klingon/stapi"
+	"github.com/pmukhin/klingon-translator/pkg/klingon/stapi/character"
 	"net/http"
+	"strings"
 )
 
 type response struct {
-	parsedName    []rune
-	characterName string
+	parsedName []rune
+	species    string
 }
 
+// Main is entry point of klingon pkg
 func Main(name string) error {
 	lexer := parser.New(name)
 	translatedName, err := lexer.Parse()
@@ -31,8 +34,8 @@ func Main(name string) error {
 		return errors.New(fmt.Sprintf("character %s is not found via Stapi.co", name))
 	}
 
-	character, err := stapiClient.Characters().Get(foundCharacters[0].UID)
-	if character == nil {
+	characterObj, err := stapiClient.Characters().Get(foundCharacters[0].UID)
+	if characterObj == nil {
 		return errors.New(
 			fmt.Sprintf(
 				"unexpected error: %s is not found via Stapi.co by UID %s",
@@ -42,14 +45,9 @@ func Main(name string) error {
 		)
 	}
 
-	species := "Human"
-	if len(character.CharacterSpecies) > 0 {
-		species = character.CharacterSpecies[0].Name
-	}
-
 	res := response{
-		parsedName:    translatedName,
-		characterName: species,
+		parsedName: translatedName,
+		species:    extractSpeciesNames(characterObj.CharacterSpecies),
 	}
 
 	render(res)
@@ -57,10 +55,17 @@ func Main(name string) error {
 	return nil
 }
 
+func extractSpeciesNames(speciesObjs []character.Species) string {
+	species := make([]string, 0)
+	for _, s := range speciesObjs {
+		species = append(species, s.Name)
+	}
+	return strings.Join(species, ", ")
+}
+
 func render(res response) {
 	for _, ch := range res.parsedName {
 		fmt.Printf("0x%X ", ch)
 	}
-	fmt.Println()
-	fmt.Println(res.characterName)
+	fmt.Println("\n" + res.species)
 }
