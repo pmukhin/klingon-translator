@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/pmukhin/klingon-translator/klingon/parser"
 	"github.com/pmukhin/klingon-translator/klingon/stapi"
+	"net/http"
 )
 
 type response struct {
@@ -20,7 +21,7 @@ func Main(name string) error {
 		return err
 	}
 
-	stapiClient := stapi.New()
+	stapiClient := stapi.New(http.DefaultClient)
 
 	foundCharacters, err := stapiClient.Characters().Search(name)
 	if err != nil {

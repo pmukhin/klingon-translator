@@ -1,4 +1,4 @@
-package util
+package http
 
 import (
 	"encoding/json"
@@ -12,7 +12,11 @@ const (
 	canNotParse = "can not parse response from server: %s"
 )
 
-func ReadResponse(resp *http.Response, data interface{}) error {
+// ReadAsJson reads the whole response ignoring Content-Length
+// as it might be set to 0 by some vendor APIs
+//
+// Then content is fed to json.Unmarshal with given pointer
+func ReadAsJson(resp *http.Response, data interface{}) error {
 	jsonBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf(canNotRead, err.Error())

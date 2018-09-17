@@ -1,6 +1,9 @@
 package stapi
 
-import "github.com/pmukhin/klingon-translator/klingon/stapi/character"
+import (
+	"github.com/pmukhin/klingon-translator/klingon/stapi/character"
+	"github.com/pmukhin/klingon-translator/klingon/stapi/http"
+)
 
 const (
 	baseUrl = "http://stapi.co"
@@ -22,8 +25,8 @@ func (d defaultClient) Characters() character.CharactersClient {
 }
 
 // New is a constructor for default implementation of Client
-func New() Client {
+func New(client http.HttpClient) Client {
 	return &defaultClient{
-		characters: character.New(baseUrl),
+		characters: character.New(baseUrl, client),
 	}
 }

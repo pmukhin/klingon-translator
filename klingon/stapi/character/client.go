@@ -1,15 +1,26 @@
 package character
 
 import (
-	"github.com/pmukhin/klingon-translator/klingon/util"
-	"net/http"
+	"github.com/pmukhin/klingon-translator/klingon/stapi/http"
 	"net/url"
+	"strings"
+)
+
+const (
+	httpFormContentType = "application/x-www-form-urlencoded"
+)
+
+var (
+	defaultCharacterSpecies = Species{
+		UID:  "",
+		Name: "Human",
+	}
 )
 
 // UID ...
 type UID string
 
-type SearchResponse struct {
+type searchResponse struct {
 	Characters []Short
 }
 
@@ -25,23 +36,31 @@ type CharactersClient interface {
 }
 
 type defaultCharactersClient struct {
-	client  http.Client
+	client  http.HttpClient
 	baseUrl string
 }
 
 // Search sends a post request to characters resource
 func (d defaultCharactersClient) Search(name string) ([]Short, error) {
 	defRet := make([]Short, 0)
-	response, err := http.PostForm(d.baseUrl+"/api/v1/rest/character/search", url.Values{
-		"name": []string{name},
-	})
+	nameSlice := []string{name} // just for not to create this slice twice
+	values := url.Values{
+		"name":  nameSlice,
+		"title": nameSlice,
+	}
+
+	response, err := d.client.Post(
+		d.baseUrl+"/api/v1/rest/character/search",
+		httpFormContentType,
+		strings.NewReader(values.Encode()),
+	)
 
 	if err != nil {
 		return defRet, err
 	}
 
-	var sr SearchResponse
-	if err := util.ReadResponse(response, &sr); err != nil {
+	var sr searchResponse
+	if err := http.ReadAsJson(response, &sr); err != nil {
 		return defRet, err
 	}
 
@@ -50,20 +69,29 @@ func (d defaultCharactersClient) Search(name string) ([]Short, error) {
 
 // Get sends a request to characters resource
 func (d defaultCharactersClient) Get(uid string) (*Full, error) {
-	response, err := http.Get(d.baseUrl + "/api/v1/rest/character?uid=" + uid)
+	response, err := d.client.Get(d.baseUrl + "/api/v1/rest/character?uid=" + uid)
 	if err != nil {
 		return nil, err
 	}
 
 	var cr fullResponse
-	if err := util.ReadResponse(response, &cr); err != nil {
+	if err := http.ReadAsJson(response, &cr); err != nil {
 		return nil, err
 	}
 
-	return cr.Character, nil
+	return d.normalize(cr.Character), nil
+}
+
+func (d defaultCharactersClient) normalize(character *Full) *Full {
+	if len(character.CharacterSpecies) > 0 {
+		return character
+	}
+	character.CharacterSpecies = append(character.CharacterSpecies, defaultCharacterSpecies)
+
+	return character
 }
 
 // New is defaultCharactersClient constructor
-func New(baseUrl string) CharactersClient {
-	return &defaultCharactersClient{baseUrl: baseUrl}
+func New(baseUrl string, client http.HttpClient) CharactersClient {
+	return &defaultCharactersClient{baseUrl: baseUrl, client: client}
 }
