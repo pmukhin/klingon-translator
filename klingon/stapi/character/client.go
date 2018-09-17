@@ -1,6 +1,7 @@
 package character
 
 import (
+	"fmt"
 	"github.com/pmukhin/klingon-translator/klingon/stapi/http"
 	"net/url"
 	"strings"
@@ -56,11 +57,11 @@ func (d defaultCharactersClient) Search(name string) ([]Short, error) {
 	)
 
 	if err != nil {
-		return defRet, err
+		return defRet, serverUnavailableErr(err)
 	}
 
 	var sr searchResponse
-	if err := http.ReadAsJson(response, &sr); err != nil {
+	if err := http.ReadAsJson(response.Body, &sr); err != nil {
 		return defRet, err
 	}
 
@@ -71,15 +72,19 @@ func (d defaultCharactersClient) Search(name string) ([]Short, error) {
 func (d defaultCharactersClient) Get(uid string) (*Full, error) {
 	response, err := d.client.Get(d.baseUrl + "/api/v1/rest/character?uid=" + uid)
 	if err != nil {
-		return nil, err
+		return nil, serverUnavailableErr(err)
 	}
 
 	var cr fullResponse
-	if err := http.ReadAsJson(response, &cr); err != nil {
+	if err := http.ReadAsJson(response.Body, &cr); err != nil {
 		return nil, err
 	}
 
 	return d.normalize(cr.Character), nil
+}
+
+func serverUnavailableErr(err error) error {
+	return fmt.Errorf("server is not available: %s", err.Error())
 }
 
 func (d defaultCharactersClient) normalize(character *Full) *Full {
