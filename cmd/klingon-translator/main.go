@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/pmukhin/klingon-translator/klingon"
+	"github.com/pmukhin/klingon-translator/pkg/klingon"
 	"os"
 )
 
